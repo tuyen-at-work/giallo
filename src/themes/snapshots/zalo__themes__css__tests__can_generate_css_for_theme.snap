@@ -35,7 +35,7 @@ expression: "generate_css(&theme, \"g-\")"
 .a.n { color: #B8A965; }
 .k.o { color: #CB7676; }
 .I.g-broken { color: #FDAEB7; font-style: italic; }
-.I.d_ { color: #FDAEB7; font-style: italic; }
+.D_.I { color: #FDAEB7; font-style: italic; }
 .I { color: #FDAEB7; font-style: italic; }
 .I.W { color: #FDAEB7; font-style: italic; }
 .E.g-message { color: #FDAEB7; }
@@ -132,4 +132,4 @@ expression: "generate_css(&theme, \"g-\")"
 .g-input.g-structure.g-void.h-.m.t { color: #444444; }
 ._B.d.h-.p.s.v- { color: #444444; }
 ._E.d.h-.p.s.v- { color: #444444; }
-.A.I.O.d_.e.h- { color: #BD976A; }
+.A.D_.I.O.e.h- { color: #BD976A; }

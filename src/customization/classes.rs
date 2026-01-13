@@ -109,13 +109,15 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "typeparameters" => "_t",
 
         // Uppercase suffix underscore shortcuts
-        "expression" => "E_",
+        "deprecated" => "D_",
         "percentage" => "P_",
 
         // Lowercase suffix underscore shortcuts
         "arrow" => "a_",
-        "deprecated" => "d_",
+        "double" => "d_",
+        "expression" => "e_",
         "parameter" => "p_",
+        "single" => "s_",
 
         // Languages uppercase
         "js" | "javascript" => "J-",
