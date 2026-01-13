@@ -3,7 +3,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-use crate::error::{Error, GialloResult};
+use crate::error::{Error, ZaloResult};
 use crate::grammars::{
     BASE_GLOBAL_RULE_REF, CompiledGrammar, GlobalRuleRef, GrammarId, InjectionPrecedence, Match,
     NO_OP_GLOBAL_RULE_REF, ROOT_RULE_ID, RawGrammar, Rule,
@@ -100,7 +100,7 @@ pub(crate) fn normalize_string(s: &str) -> String {
     s.replace("\r\n", "\n").replace('\r', "\n")
 }
 
-/// The main struct in giallo.
+/// The main struct in zalo.
 ///
 /// Holds all the grammars and themes and is responsible for highlighting a text. It is not
 /// responsible for actually rendering those highlighted texts.
@@ -124,7 +124,7 @@ pub struct Registry {
 }
 
 impl Registry {
-    fn add_grammar_from_raw(&mut self, raw_grammar: RawGrammar) -> GialloResult<()> {
+    fn add_grammar_from_raw(&mut self, raw_grammar: RawGrammar) -> ZaloResult<()> {
         if self.linked && self.grammar_id_by_name.contains_key(&raw_grammar.name) {
             return Err(Error::ReplacingGrammarPostLinking(
                 raw_grammar.name.to_owned(),
@@ -143,7 +143,7 @@ impl Registry {
     }
 
     /// Reads the file and add it as a grammar.
-    pub fn add_grammar_from_path(&mut self, path: impl AsRef<Path>) -> GialloResult<()> {
+    pub fn add_grammar_from_path(&mut self, path: impl AsRef<Path>) -> ZaloResult<()> {
         let raw_grammar = RawGrammar::load_from_file(path)?;
         self.add_grammar_from_raw(raw_grammar)
     }
@@ -151,7 +151,7 @@ impl Registry {
     /// Adds an empty grammar that will not match any token. Useful as a fallback if the grammar is not found.
     ///
     /// It will get the `plain` grammar name.
-    pub fn add_plain_grammar(&mut self, aliases: &[&str]) -> GialloResult<()> {
+    pub fn add_plain_grammar(&mut self, aliases: &[&str]) -> ZaloResult<()> {
         let raw = RawGrammar {
             name: PLAIN_GRAMMAR_NAME.to_owned(),
             scope_name: PLAIN_GRAMMAR_NAME.to_owned(),
@@ -176,7 +176,7 @@ impl Registry {
     }
 
     /// Reads the file and add it as a theme.
-    pub fn add_theme_from_path(&mut self, path: impl AsRef<Path>) -> GialloResult<()> {
+    pub fn add_theme_from_path(&mut self, path: impl AsRef<Path>) -> ZaloResult<()> {
         let raw_theme = RawTheme::load_from_file(path)?;
         let compiled_theme = raw_theme.compile()?;
         self.themes
@@ -189,7 +189,7 @@ impl Registry {
     ///
     /// Use this with `HtmlRenderer::css_class_prefix` to enable CSS-based theming,
     /// which allows JavaScript-based theme switching.
-    pub fn generate_css(&self, theme_name: &str, prefix: &str) -> GialloResult<String> {
+    pub fn generate_css(&self, theme_name: &str, prefix: &str) -> ZaloResult<String> {
         let theme = self
             .themes
             .get(theme_name.to_lowercase().as_str())
@@ -197,11 +197,30 @@ impl Registry {
         Ok(crate::themes::css::generate_css(theme, prefix))
     }
 
+    /// Generates CSS stylesheets for all themes in the registry.
+    /// All classes will have the given prefix.
+    ///
+    /// Use this with `HtmlRenderer::css_class_prefix` to enable CSS-based theming,
+    /// which allows JavaScript-based theme switching.
+    pub fn generate_all_css(&self, prefix: &str) -> ZaloResult<HashMap<String, String>> {
+        let mut css_map = HashMap::new();
+        for (theme_name, theme) in &self.themes {
+            let css = crate::themes::css::generate_css(theme, prefix);
+            css_map.insert(theme_name.clone(), css);
+        }
+        Ok(css_map)
+    }
+
+    /// Get all available themes
+    pub fn get_theme_names(&self) -> ZaloResult<Vec<String>> {
+        Ok(self.themes.keys().cloned().collect())
+    }
+
     pub(crate) fn tokenize(
         &self,
         grammar_id: GrammarId,
         content: &str,
-    ) -> GialloResult<Vec<Vec<Token>>> {
+    ) -> ZaloResult<Vec<Vec<Token>>> {
         let mut tokenizer = Tokenizer::new(grammar_id, self);
         let tokens = tokenizer
             .tokenize_string(content)
@@ -221,7 +240,7 @@ impl Registry {
         self.themes.contains_key(name.to_lowercase().as_str())
     }
 
-    /// The main entry point for the actual giallo usage.
+    /// The main entry point for the actual zalo usage.
     ///
     /// This returns the raw output of the tokenizer + theme matching. It's up to you to use
     /// a provided renderer or to use your own afterwards.
@@ -231,7 +250,7 @@ impl Registry {
         &self,
         content: &str,
         options: &HighlightOptions,
-    ) -> GialloResult<HighlightedCode<'_>> {
+    ) -> ZaloResult<HighlightedCode<'_>> {
         if !self.linked {
             return Err(Error::UnlinkedGrammars);
         }
@@ -437,7 +456,7 @@ impl Registry {
 
     #[cfg(feature = "dump")]
     /// Dump the registry + scope repository to a binary file that can be loaded later
-    pub fn dump_to_file(&self, path: impl AsRef<Path>) -> GialloResult<()> {
+    pub fn dump_to_file(&self, path: impl AsRef<Path>) -> ZaloResult<()> {
         use crate::scope::lock_global_scope_repo;
         use flate2::{Compression, write::GzEncoder};
         use std::io::Write;
@@ -459,7 +478,7 @@ impl Registry {
     }
 
     #[cfg(feature = "dump")]
-    fn load_from_bytes(compressed_data: &[u8]) -> GialloResult<Self> {
+    fn load_from_bytes(compressed_data: &[u8]) -> ZaloResult<Self> {
         use crate::scope::replace_global_scope_repo;
         use flate2::read::GzDecoder;
         use std::io::Read;
@@ -475,22 +494,22 @@ impl Registry {
     }
 
     #[cfg(feature = "dump")]
-    /// Read a binary dump from giallo and load registry + scope repository from it
-    pub fn load_from_file(path: impl AsRef<Path>) -> GialloResult<Self> {
+    /// Read a binary dump from zalo and load registry + scope repository from it
+    pub fn load_from_file(path: impl AsRef<Path>) -> ZaloResult<Self> {
         let compressed_data = std::fs::read(path)?;
         Self::load_from_bytes(&compressed_data)
     }
 
     #[cfg(feature = "dump")]
     /// Load the builtin registry containing all grammars and themes from grammars-themes
-    pub fn builtin() -> GialloResult<Self> {
+    pub fn builtin() -> ZaloResult<Self> {
         Self::load_from_bytes(BUILTIN_DATA)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
+    use std::fs::{self, create_dir_all};
 
     use super::*;
     use crate::highlight::HighlightedText;
@@ -606,6 +625,7 @@ mod tests {
     #[test]
     fn can_tokenize_like_vscode_textmate() {
         let registry = get_registry();
+        create_dir_all("src/fixtures/tokens").unwrap();
         let expected_tokens = get_output_folder_content("src/fixtures/tokens");
 
         for (grammar, expected) in expected_tokens {
@@ -660,6 +680,7 @@ mod tests {
     #[test]
     fn can_highlight_like_vscode_textmate() {
         let registry = get_registry();
+        create_dir_all("src/fixtures/snapshots").unwrap();
         let expected_snapshots = get_output_folder_content("src/fixtures/snapshots");
 
         for (grammar, expected) in expected_snapshots {

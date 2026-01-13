@@ -1,5 +1,5 @@
-use crate::RenderOptions;
 use crate::registry::PLAIN_GRAMMAR_NAME;
+use crate::{RenderOptions, customization};
 use std::collections::BTreeMap;
 use std::ops::RangeInclusive;
 
@@ -12,6 +12,10 @@ pub struct ParsedFence {
     pub options: RenderOptions,
     /// Whatever we don't recognize
     pub rest: BTreeMap<String, String>,
+    /// Classes to add to the code block
+    pub classes: Vec<String>,
+    /// Is the injected code
+    pub injected: bool,
 }
 
 impl Default for ParsedFence {
@@ -20,6 +24,8 @@ impl Default for ParsedFence {
             lang: PLAIN_GRAMMAR_NAME.to_string(),
             options: RenderOptions::default(),
             rest: BTreeMap::new(),
+            classes: Vec::new(),
+            injected: false,
         }
     }
 }
@@ -60,8 +66,9 @@ pub fn parse_markdown_fence(fence: &str) -> ParsedFence {
     let mut language = None;
     let mut options = RenderOptions::default();
     let mut rest = BTreeMap::new();
+    let mut classes = Vec::new();
 
-    for token in fence.split(',') {
+    for token in fence.split(' ') {
         let token = token.trim();
         if token.is_empty() {
             continue;
@@ -77,7 +84,7 @@ pub fn parse_markdown_fence(fence: &str) -> ParsedFence {
             "linenos" => options.show_line_numbers = true,
             "hl_lines" => {
                 if let Some(ranges_str) = token_split.next() {
-                    for range_str in ranges_str.split(' ') {
+                    for range_str in ranges_str.split(',') {
                         if let Some(range) = parse_range(range_str) {
                             options.highlight_lines.push(range);
                         }
@@ -86,7 +93,7 @@ pub fn parse_markdown_fence(fence: &str) -> ParsedFence {
             }
             "hide_lines" => {
                 if let Some(ranges_str) = token_split.next() {
-                    for range_str in ranges_str.split(' ') {
+                    for range_str in ranges_str.split(',') {
                         if let Some(range) = parse_range(range_str) {
                             options.hide_lines.push(range);
                         }
@@ -96,17 +103,23 @@ pub fn parse_markdown_fence(fence: &str) -> ParsedFence {
             key => {
                 if let Some(value) = token_split.next() {
                     rest.insert(key.to_string(), value.trim().to_string());
+                } else if language.is_none() {
+                    language = Some(customization::normalize_input_language(key));
                 } else {
-                    language = Some(key);
+                    classes.push(key.to_string());
                 }
             }
         }
     }
 
+    let injected = classes.iter().any(|c| c == "injected");
+
     ParsedFence {
         lang: language.unwrap_or_default().to_string(),
         options,
         rest,
+        classes,
+        injected,
     }
 }
 
@@ -132,14 +145,14 @@ mod tests {
 
     #[test]
     fn test_line_numbers() {
-        let result = parse_markdown_fence("python,linenos");
+        let result = parse_markdown_fence("python linenos");
         assert_eq!(result.lang, "python");
         assert!(result.options.show_line_numbers);
     }
 
     #[test]
     fn test_line_number_start() {
-        let result = parse_markdown_fence("javascript,linenos,linenostart=5");
+        let result = parse_markdown_fence("javascript linenos linenostart=5");
         assert_eq!(result.lang, "javascript");
         assert!(result.options.show_line_numbers);
         assert_eq!(result.options.line_number_start, 5);
@@ -147,21 +160,21 @@ mod tests {
 
     #[test]
     fn test_highlight_lines_multiple() {
-        let result = parse_markdown_fence("rust,hl_lines=1-3 5 7-9");
+        let result = parse_markdown_fence("rust hl_lines=1-3,5,7-9");
         assert_eq!(result.lang, "rust");
         assert_eq!(result.options.highlight_lines, vec![1..=3, 5..=5, 7..=9]);
     }
 
     #[test]
     fn test_hide_lines() {
-        let result = parse_markdown_fence("rust,hide_lines=2 4-6");
+        let result = parse_markdown_fence("rust hide_lines=2,4-6");
         assert_eq!(result.lang, "rust");
         assert_eq!(result.options.hide_lines, vec![2..=2, 4..=6]);
     }
 
     #[test]
     fn test_metadata() {
-        let result = parse_markdown_fence("rust,name=example,copy=true");
+        let result = parse_markdown_fence("rust name=example copy=true");
         assert_eq!(result.lang, "rust");
         assert_eq!(result.rest.get("name"), Some(&"example".to_string()));
         assert_eq!(result.rest.get("copy"), Some(&"true".to_string()));
@@ -170,7 +183,7 @@ mod tests {
     #[test]
     fn test_complex_combination() {
         let result = parse_markdown_fence(
-            "rust,linenos,linenostart=10,hl_lines=1-3 5,hide_lines=2,name=test",
+            "rust linenos linenostart=10 hl_lines=1-3,5 hide_lines=2 name=test",
         );
         assert_eq!(result.lang, "rust");
         assert!(result.options.show_line_numbers);

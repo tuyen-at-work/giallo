@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::renderers::html::HtmlEscaped;
 use crate::scope::Scope;
 use crate::themes::compiled::ThemeType;
-use crate::themes::{Color, CompiledTheme, Style, ThemeVariant, scope_to_css_selector};
+use crate::themes::{Color, CompiledTheme, Style, ThemeVariant, scope_to_css_classes};
 use crate::tokenizer::Token;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -101,11 +101,15 @@ impl HighlightedText {
             if self.scopes.is_empty() {
                 return format!("<span>{escaped}</span>");
             }
-            let css_classes: Vec<String> = self
+            let mut css_classes: Vec<String> = self
                 .scopes
                 .iter()
-                .map(|scope| scope_to_css_selector(*scope, prefix, true))
+                .flat_map(|scope| scope_to_css_classes(*scope, prefix))
                 .collect();
+
+            css_classes.sort();
+            css_classes.dedup();
+
             return format!(
                 r#"<span class="{}">{escaped}</span>"#,
                 css_classes.join(" ").trim(),
@@ -969,6 +973,6 @@ mod tests {
             scopes: vec![scope("keyword"), scope("keyword.control")],
         };
         let res = ht.as_html(&ThemeVariant::Single(&test_theme), Some("g-"));
-        insta::assert_snapshot!(res, @r#"<span class="g-keyword g-keyword g-control">hello</span>"#);
+        insta::assert_snapshot!(res, @r#"<span class="_C k">hello</span>"#);
     }
 }

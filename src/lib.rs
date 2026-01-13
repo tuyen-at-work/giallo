@@ -4,7 +4,7 @@
 //! # Example
 //!
 //! ```ignore
-//! use giallo::{HighlightOptions, HtmlRenderer, Options, Registry, ThemeVariant};
+//! use zalo::{HighlightOptions, HtmlRenderer, Options, Registry, ThemeVariant};
 //!
 //! // Using the `dump` feature and loading the prebuilt assets
 //! let registry = Registry::load_from_file("builtin.msgpack")?;
@@ -33,6 +33,8 @@ mod markdown_fence;
 mod renderers;
 mod tokenizer;
 
+mod customization;
+
 pub use error::Error;
 pub use highlight::HighlightedText;
 pub use markdown_fence::{ParsedFence, parse_markdown_fence};
@@ -41,12 +43,12 @@ pub use renderers::{RenderOptions, html::HtmlRenderer, terminal::TerminalRendere
 pub use themes::{Color, CompiledTheme, FontStyle, Style, ThemeVariant};
 
 /// The CSS needed for the line number gutter to display properly
-pub const GIALLO_CSS: &str = r#".giallo-l {
+pub const ZALO_CSS: &str = r#".z-l {
   display: inline-block;
   min-height: 1lh;
   width: 100%;
 }
-.giallo-ln {
+.z-ln {
   display: inline-block;
   user-select: none;
   margin-right: 0.4em;
