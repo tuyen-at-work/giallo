@@ -1,4 +1,4 @@
-use crate::customization;
+use crate::customization::normalize_language;
 use crate::registry::HighlightedCode;
 use crate::renderers::RenderOptions;
 use crate::themes::{Color, ThemeVariant};
@@ -28,7 +28,11 @@ impl HtmlRenderer {
     pub fn render(&self, highlighted: &HighlightedCode, options: &RenderOptions) -> String {
         let prefix_html = self.prefix_html.unwrap_or("");
         let suffix_html = self.suffix_html.unwrap_or("");
-        let lang = customization::normalize_output_language(highlighted.language);
+        let lang = if let Some(normalizer) = highlighted.normalizer {
+            normalizer(highlighted.language)
+        } else {
+            normalize_language(highlighted.language)
+        };
         let css_prefix = self.css_class_prefix.as_deref();
 
         // Pre-compute highlight background CSS/class if available

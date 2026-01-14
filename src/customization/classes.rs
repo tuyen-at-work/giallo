@@ -1,17 +1,7 @@
-pub fn normalize_output_language(language: &str) -> &str {
-    match language {
-        "shellscript" => "bash",
-        "plain" => "text",
-        "js" => "javascript",
-        "cs" => "csharp",
-        "yml" => "yaml",
-        "regexp" => "regex",
-        "rs" => "rust",
-        l => l,
-    }
-}
+pub type IdentifierShortener = fn(&str, &str) -> String;
+pub type LanguageNormalizer = fn(&str) -> &str;
 
-pub fn normalize_input_language(language: &str) -> &str {
+pub fn normalize_language(language: &str) -> &str {
     match language {
         "plain" => "text",
         "htm" => "html",

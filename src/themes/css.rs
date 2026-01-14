@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use crate::customization;
+use crate::customization::IdentifierShortener;
 use crate::scope::{EMPTY_ATOM_NUMBER, MAX_ATOMS_IN_SCOPE, Scope, lock_global_scope_repo};
 use crate::themes::compiled::CompiledTheme;
 
@@ -8,7 +8,7 @@ use crate::themes::compiled::CompiledTheme;
 ///
 /// This is used with the HTML renderer, typically to switch highlighting scheme in light/dark
 /// mode which is something that cannot be done inline.
-pub fn generate_css(theme: &CompiledTheme, prefix: &str) -> String {
+pub fn generate_css(theme: &CompiledTheme, prefix: &str, shortener: IdentifierShortener) -> String {
     let mut css = String::new();
 
     // Add header comment
@@ -52,7 +52,7 @@ pub fn generate_css(theme: &CompiledTheme, prefix: &str) -> String {
     // Generate CSS for each theme rule
     for rule in &theme.rules {
         if rule.style_modifier.has_properties() {
-            generate_rule_css(&mut css, rule, prefix);
+            generate_rule_css(&mut css, rule, prefix, shortener);
         }
     }
 
@@ -64,8 +64,9 @@ fn generate_rule_css(
     css: &mut String,
     rule: &crate::themes::compiled::CompiledThemeRule,
     prefix: &str,
+    shortener: IdentifierShortener,
 ) {
-    let css_selector = scope_to_css_selector(rule.selector.target_scope, prefix, false);
+    let css_selector = scope_to_css_selector(rule.selector.target_scope, prefix, false, shortener);
 
     write!(css, "{css_selector} {{").unwrap();
 
@@ -84,8 +85,13 @@ fn generate_rule_css(
 /// Convert a scope to CSS selector or class string with prefixed classes
 /// e.g. "keyword.operator" -> ".g-keyword.g-operator" if as_class=false
 /// and "g-keyword g-operator" if as_class=true
-pub fn scope_to_css_selector(scope: Scope, prefix: &str, as_class: bool) -> String {
-    let css_classes = scope_to_css_classes(scope, prefix);
+pub fn scope_to_css_selector(
+    scope: Scope,
+    prefix: &str,
+    as_class: bool,
+    shortener: IdentifierShortener,
+) -> String {
+    let css_classes = scope_to_css_classes(scope, prefix, shortener);
     if as_class {
         css_classes.join(" ")
     } else {
@@ -97,7 +103,11 @@ pub fn scope_to_css_selector(scope: Scope, prefix: &str, as_class: bool) -> Stri
     }
 }
 
-pub fn scope_to_css_classes(scope: Scope, prefix: &str) -> Vec<String> {
+pub fn scope_to_css_classes(
+    scope: Scope,
+    prefix: &str,
+    shortener: IdentifierShortener,
+) -> Vec<String> {
     let mut css_classes = Vec::new();
     let repo = lock_global_scope_repo();
 
@@ -113,7 +123,7 @@ pub fn scope_to_css_classes(scope: Scope, prefix: &str) -> Vec<String> {
             n => {
                 let atom_str = repo.atom_number_to_str(n);
 
-                let class = escape_css_identifier(atom_str, prefix);
+                let class = escape_css_identifier(atom_str, prefix, shortener);
 
                 css_classes.push(class);
             }
@@ -126,7 +136,7 @@ pub fn scope_to_css_classes(scope: Scope, prefix: &str) -> Vec<String> {
 }
 
 /// Escape special characters in CSS identifiers, namely the class names
-fn escape_css_identifier(identifier: &str, prefix: &str) -> String {
+fn escape_css_identifier(identifier: &str, prefix: &str, shortener: IdentifierShortener) -> String {
     let identifier =
         identifier
             .chars()
@@ -144,47 +154,57 @@ fn escape_css_identifier(identifier: &str, prefix: &str) -> String {
                 output
             });
 
-    customization::shorten_identifier(&identifier, prefix)
+    shortener(&identifier, prefix)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::customization::shorten_identifier;
     use crate::scope::Scope;
     use crate::themes::RawTheme;
     use insta::assert_snapshot;
 
     #[test]
     fn test_escape_css_identifier() {
-        assert_eq!(escape_css_identifier("keyword", "g-"), "k");
         assert_eq!(
-            escape_css_identifier("meta-function", "g-"),
+            escape_css_identifier("keyword", "g-", shorten_identifier),
+            "k"
+        );
+        assert_eq!(
+            escape_css_identifier("meta-function", "g-", shorten_identifier),
             "g-meta-function"
         );
-        assert_eq!(escape_css_identifier("git_gutter", "g-"), "g-git_gutter");
+        assert_eq!(
+            escape_css_identifier("git_gutter", "g-", shorten_identifier),
+            "g-git_gutter"
+        );
         // Special characters should be escaped
-        assert_eq!(escape_css_identifier("c++", "g-"), "g-c\\2b \\2b ");
+        assert_eq!(
+            escape_css_identifier("c++", "g-", shorten_identifier),
+            "g-c\\2b \\2b "
+        );
     }
 
     #[test]
     fn test_scope_to_css_selector() {
         let scope = Scope::new("keyword.operator")[0];
-        let selector = scope_to_css_selector(scope, "g-", false);
+        let selector = scope_to_css_selector(scope, "g-", false, shorten_identifier);
         assert_eq!(selector, ".k.o");
 
         let simple_scope = Scope::new("comment")[0];
-        let simple_selector = scope_to_css_selector(simple_scope, "g-", false);
+        let simple_selector = scope_to_css_selector(simple_scope, "g-", false, shorten_identifier);
         assert_eq!(simple_selector, ".c");
     }
 
     #[test]
     fn test_scope_to_css_class() {
         let scope = Scope::new("keyword.operator")[0];
-        let class = scope_to_css_selector(scope, "g-", true);
+        let class = scope_to_css_selector(scope, "g-", true, shorten_identifier);
         assert_eq!(class, "k o");
 
         let simple_scope = Scope::new("comment")[0];
-        let simple_class = scope_to_css_selector(simple_scope, "g-", true);
+        let simple_class = scope_to_css_selector(simple_scope, "g-", true, shorten_identifier);
         assert_eq!(simple_class, "c");
     }
 
@@ -196,6 +216,6 @@ mod tests {
         .unwrap()
         .compile()
         .unwrap();
-        assert_snapshot!(generate_css(&theme, "g-"));
+        assert_snapshot!(generate_css(&theme, "g-", shorten_identifier));
     }
 }

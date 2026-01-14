@@ -1,5 +1,7 @@
 mod classes;
 
-pub use classes::normalize_input_language;
-pub use classes::normalize_output_language;
+pub use classes::IdentifierShortener;
+pub use classes::LanguageNormalizer;
+
+pub use classes::normalize_language;
 pub use classes::shorten_identifier;

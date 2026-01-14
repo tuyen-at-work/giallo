@@ -3,6 +3,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
+use crate::customization::{self, IdentifierShortener, LanguageNormalizer};
 use crate::error::{Error, ZaloResult};
 use crate::grammars::{
     BASE_GLOBAL_RULE_REF, CompiledGrammar, GlobalRuleRef, GrammarId, InjectionPrecedence, Match,
@@ -27,7 +28,7 @@ struct Dump {
 const BUILTIN_DATA: &[u8] = include_bytes!("../builtin.msgpack");
 
 /// The default grammar name, where nothing is highlighted
-pub const PLAIN_GRAMMAR_NAME: &str = "plain";
+pub const PLAIN_GRAMMAR_NAME: &str = "text";
 
 /// Options for highlighting by the registry, NOT rendering.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -93,6 +94,8 @@ pub struct HighlightedCode<'a> {
     pub theme: ThemeVariant<&'a CompiledTheme>,
     /// The generated tokens. Each line is a Vector
     pub tokens: Vec<Vec<HighlightedText>>,
+    /// Function to normalize the language
+    pub normalizer: Option<LanguageNormalizer>,
 }
 
 #[inline]
@@ -104,7 +107,7 @@ pub(crate) fn normalize_string(s: &str) -> String {
 ///
 /// Holds all the grammars and themes and is responsible for highlighting a text. It is not
 /// responsible for actually rendering those highlighted texts.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Registry {
     // Vector of compiled grammars for ID-based access
     pub(crate) grammars: Vec<CompiledGrammar>,
@@ -121,6 +124,12 @@ pub struct Registry {
     injections_by_grammar: Vec<HashSet<GrammarId>>,
     // Once a registry has linked grammars, it's not possible to replace existing grammars.
     linked: bool,
+    /// Function to shorten identifiers
+    #[serde(skip)]
+    shortener: Option<IdentifierShortener>,
+    /// Function to normalize the language
+    #[serde(skip)]
+    normalizer: Option<LanguageNormalizer>,
 }
 
 impl Registry {
@@ -190,11 +199,12 @@ impl Registry {
     /// Use this with `HtmlRenderer::css_class_prefix` to enable CSS-based theming,
     /// which allows JavaScript-based theme switching.
     pub fn generate_css(&self, theme_name: &str, prefix: &str) -> ZaloResult<String> {
+        let shortenr = self.shortener.unwrap_or(customization::shorten_identifier);
         let theme = self
             .themes
             .get(theme_name.to_lowercase().as_str())
             .ok_or_else(|| Error::ThemeNotFound(theme_name.to_string()))?;
-        Ok(crate::themes::css::generate_css(theme, prefix))
+        Ok(crate::themes::css::generate_css(theme, prefix, shortenr))
     }
 
     /// Generates CSS stylesheets for all themes in the registry.
@@ -203,9 +213,10 @@ impl Registry {
     /// Use this with `HtmlRenderer::css_class_prefix` to enable CSS-based theming,
     /// which allows JavaScript-based theme switching.
     pub fn generate_all_css(&self, prefix: &str) -> ZaloResult<HashMap<String, String>> {
+        let shortenr = self.shortener.unwrap_or(customization::shorten_identifier);
         let mut css_map = HashMap::new();
         for (theme_name, theme) in &self.themes {
-            let css = crate::themes::css::generate_css(theme, prefix);
+            let css = crate::themes::css::generate_css(theme, prefix, shortenr);
             css_map.insert(theme_name.clone(), css);
         }
         Ok(css_map)
@@ -281,7 +292,7 @@ impl Registry {
                     .get(theme_name)
                     .ok_or_else(|| Error::ThemeNotFound(theme_name.clone()))?;
 
-                let mut highlighter = Highlighter::new(theme);
+                let mut highlighter = Highlighter::new(theme, self.shortener);
                 let highlighted_tokens =
                     highlighter.highlight_tokens(&normalized_content, tokens, merging_options);
 
@@ -289,6 +300,7 @@ impl Registry {
                     language: &self.grammars[grammar_id].name,
                     theme: ThemeVariant::Single(theme),
                     tokens: highlighted_tokens,
+                    normalizer: self.normalizer,
                 })
             }
             ThemeVariant::Dual { light, dark } => {
@@ -301,7 +313,8 @@ impl Registry {
                     .get(dark)
                     .ok_or_else(|| Error::ThemeNotFound(dark.clone()))?;
 
-                let mut highlighter = Highlighter::new_dual(light_theme, dark_theme);
+                let mut highlighter =
+                    Highlighter::new_dual(light_theme, dark_theme, self.shortener);
                 let highlighted_tokens =
                     highlighter.highlight_tokens(&normalized_content, tokens, merging_options);
 
@@ -312,6 +325,7 @@ impl Registry {
                         dark: dark_theme,
                     },
                     tokens: highlighted_tokens,
+                    normalizer: self.normalizer,
                 })
             }
         }
