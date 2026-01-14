@@ -40,8 +40,8 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "delimiter" => "D",
         "error" => "E",
         "function-call" => "F",
-        // G
-        // H
+        "control" => "G",
+        "html" => "H",
         "invalid" | "illegal" => "I", // alias for invalid
         "property-name" => "J",
         "key-value" => "K",
@@ -71,7 +71,7 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "group" => "g",
         "header" | "heading" => "h",
         "identifier" => "i",
-        // j
+        "json" => "j",
         "keyword" => "k",
         "language" => "l",
         "meta" => "m",
@@ -92,7 +92,7 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         // Uppercase underscore shortcuts
         "assignment" => "_A",
         "begin" => "_B",
-        "control" => "_C",
+        "character-class" => "_C",
         "diff" => "_D",
         "end" => "_E",
         "primitive" => "_P",
@@ -119,6 +119,7 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "deprecated" => "D_",
         "embedded" => "E_",
         "member" => "M_",
+        "new" => "N_",
         "pseudo-element" => "O_",
         "option" => "O_",
         "percentage" => "P_",
@@ -146,9 +147,7 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "bash" | "shell" => "b-",
         "css" => "c-",
         "graphql" => "g-",
-        "html" => "h-",
         "ini" => "i-",
-        "json" => "j-",
         "python" => "p-",
         "tsx" => "t-",
         "yml" | "yaml" => "y-",

@@ -973,6 +973,6 @@ mod tests {
             scopes: vec![scope("keyword"), scope("keyword.control")],
         };
         let res = ht.as_html(&ThemeVariant::Single(&test_theme), Some("g-"));
-        insta::assert_snapshot!(res, @r#"<span class="_C k">hello</span>"#);
+        insta::assert_snapshot!(res, @r#"<span class="G k">hello</span>"#);
     }
 }

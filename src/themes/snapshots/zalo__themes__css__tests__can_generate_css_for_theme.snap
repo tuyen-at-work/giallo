@@ -28,7 +28,7 @@ expression: "generate_css(&theme, \"g-\")"
 .g-brace.m { color: #444444; }
 .l.v { color: #C99076; }
 .e.n { color: #80A665; }
-.h-.t { color: #4D9375; }
+.H.t { color: #4D9375; }
 .R.T { color: #CB7676; }
 .V.a { color: #C98A7D; }
 .J.m { color: #B8A965; }
@@ -83,7 +83,7 @@ expression: "generate_css(&theme, \"g-\")"
 .B.S.T { color: #CB7676; }
 .C.g-undefined.l { color: #CB7676; }
 .C.g-null.l { color: #CB7676; }
-.g-derivative.h-.s { color: #DBD7CACC; }
+.H.g-derivative.s { color: #DBD7CACC; }
 .M.R.g-package { color: #DBD7CACC; }
 .M.R.g-import { color: #DBD7CACC; }
 .R.T.g-java { color: #DBD7CACC; }
@@ -92,7 +92,7 @@ expression: "generate_css(&theme, \"g-\")"
 .A.O.e { color: #BD976A; }
 .S.T._P { color: #5DA994; }
 .T.e.n { color: #5DA994; }
-.g-character-class.r.s { color: #C98A7D; }
+._C.r.s { color: #C98A7D; }
 .O.k.u { color: #CB7676; }
 .C.b.l { color: #4D9375; }
 ._d.d.p { color: #FDAEB7; background-color: #86181D; }
@@ -105,7 +105,7 @@ expression: "generate_css(&theme, \"g-\")"
 .E_.X.g-ruby { color: #C98A7D; }
 .g-arbitrary-repitition.r.s { color: #C98A7D; }
 .C.C_._e { color: #E6CC77; }
-.I.g-character-not-allowed-here.h- { color: #444444; }
+.H.I.g-character-not-allowed-here { color: #444444; }
 .T.g-annotation.k.o { color: #444444; }
 .E_.g-block.g-github-actions-expression.m { color: #444444; }
 .R.T.a_.f { color: #444444; }
@@ -120,16 +120,16 @@ expression: "generate_css(&theme, \"g-\")"
 ._D.g-to-file.h.m { color: #85E89D; background-color: #144620; }
 .C.L.O.g-reference { color: #C98A7D; }
 .L._m.g-markdown.g-underline { color: #DEDCD590; text-decoration: underline; }
-.C.O.g-character-class.r { color: #6872AB; }
-.I.g-unrecognized-tag.h- {  }
-.g-any.g-block.h-.m.t { color: #444444; }
-.g-any.g-inline.h-.m.t { color: #444444; }
+.C.O._C.r { color: #6872AB; }
+.H.I.g-unrecognized-tag {  }
+.H.g-any.g-block.m.t { color: #444444; }
+.H.g-any.g-inline.m.t { color: #444444; }
 ._B.d.g-list.g-markdown.p { color: #D4976C; }
 ._B.d.g-markdown.p.s { color: #C98A7D; }
 ._E.d.g-markdown.p.s { color: #C98A7D; }
 .L._m.g-image.g-markdown.g-underline { color: #DEDCD590; text-decoration: underline; }
-.A.O.e.h-.v- { color: #80A665; }
-.g-input.g-structure.g-void.h-.m.t { color: #444444; }
-._B.d.h-.p.s.v- { color: #444444; }
-._E.d.h-.p.s.v- { color: #444444; }
-.A.D_.I.O.e.h- { color: #BD976A; }
+.A.H.O.e.v- { color: #80A665; }
+.H.g-input.g-structure.g-void.m.t { color: #444444; }
+.H._B.d.p.s.v- { color: #444444; }
+.H._E.d.p.s.v- { color: #444444; }
+.A.D_.H.I.O.e { color: #BD976A; }
