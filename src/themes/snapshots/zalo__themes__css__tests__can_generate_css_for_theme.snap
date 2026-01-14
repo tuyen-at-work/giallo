@@ -22,7 +22,7 @@ expression: "generate_css(&theme, \"g-\")"
 .g-carriage-return { color: #24292E; background-color: #F97583; font-style: italic;text-decoration: underline; }
 .g-number { color: #4C9A91; }
 .v { color: #C98A7D; }
-.X { color: #C98A7D; }
+._S { color: #C98A7D; }
 .c.s { color: #758575DD; }
 .D.g-bracket { color: #444444; }
 .g-brace.m { color: #444444; }
@@ -38,8 +38,8 @@ expression: "generate_css(&theme, \"g-\")"
 .D_.I { color: #FDAEB7; font-style: italic; }
 .I { color: #FDAEB7; font-style: italic; }
 .I.U_ { color: #FDAEB7; font-style: italic; }
-.E.g-message { color: #FDAEB7; }
-.X.r { color: #C4704F; }
+.E_.g-message { color: #FDAEB7; }
+._S.r { color: #C4704F; }
 .r.s { color: #C4704F; }
 .C.S { color: #C99076; }
 .C.N { color: #4C9A91; }
@@ -102,14 +102,14 @@ expression: "generate_css(&theme, \"g-\")"
 ._D.h.m { color: #79B8FF; }
 .L.O.s { color: #C98A7D; }
 .C.C_._e { color: #C98A7D; }
-.E_.X.g-ruby { color: #C98A7D; }
+.E._S.g-ruby { color: #C98A7D; }
 .g-arbitrary-repitition.r.s { color: #C98A7D; }
 .C.C_._e { color: #E6CC77; }
 .H.I.g-character-not-allowed-here { color: #444444; }
 .T.g-annotation.k.o { color: #444444; }
-.E_.g-block.g-github-actions-expression.m { color: #444444; }
+.E.g-block.g-github-actions-expression.m { color: #444444; }
 .R.T.a_.f { color: #444444; }
-.R.T._c.g-jsdoc { color: #4D9375; }
+.R.T.X.g-jsdoc { color: #4D9375; }
 .C.g-import-export-all.g-ts.l { color: #CB7676; }
 .J.S.T.p { color: #B8A96577; }
 .e.n.t.y- { color: #B8A965; }

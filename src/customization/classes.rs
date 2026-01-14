@@ -38,7 +38,7 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "builtin" => "B",
         "constant" => "C",
         "delimiter" => "D",
-        "error" => "E",
+        "embedded" => "E",
         "function-call" => "F",
         "control" => "G",
         "html" => "H",
@@ -57,7 +57,7 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "using" => "U",
         "value" => "V",
         "double" => "W",
-        "source" => "X",
+        "class" => "X",
         "accessor" => "Y",
         "separator" => "Z",
 
@@ -99,10 +99,10 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "or" => "_O",
         "primitive" => "_P",
         "url" => "_U",
+        "source" => "_S",
 
         // Lowercase underscore shortcuts
         "attribute" => "_a",
-        "class" => "_c",
         "deleted" => "_d",
         "escape" => "_e",
         "font-name" => "_f",
@@ -120,7 +120,7 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         // Uppercase suffix underscore shortcuts
         "character" => "C_",
         "deprecated" => "D_",
-        "embedded" => "E_",
+        "error" => "E_",
         "member" => "M_",
         "new" => "N_",
         "pseudo-element" => "O_",
