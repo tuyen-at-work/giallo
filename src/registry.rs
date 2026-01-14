@@ -134,14 +134,14 @@ pub struct Registry {
 
 impl Registry {
     /// Sets the identifier shortener function for the registry.
-    pub fn set_shortener(&mut self, shortener: IdentifierShortener) -> &Self {
+    pub fn set_shortener(mut self, shortener: IdentifierShortener) -> Self {
         self.shortener = Some(shortener);
 
         self
     }
 
     /// Sets the language normalizer function for the registry.
-    pub fn set_normalizer(&mut self, normalizer: LanguageNormalizer) -> &Self {
+    pub fn set_normalizer(mut self, normalizer: LanguageNormalizer) -> Self {
         self.normalizer = Some(normalizer);
 
         self
