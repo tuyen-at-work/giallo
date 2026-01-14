@@ -37,7 +37,7 @@ expression: "generate_css(&theme, \"g-\")"
 .I.g-broken { color: #FDAEB7; font-style: italic; }
 .D_.I { color: #FDAEB7; font-style: italic; }
 .I { color: #FDAEB7; font-style: italic; }
-.I.W { color: #FDAEB7; font-style: italic; }
+.I.U_ { color: #FDAEB7; font-style: italic; }
 .E.g-message { color: #FDAEB7; }
 .X.r { color: #C4704F; }
 .r.s { color: #C4704F; }

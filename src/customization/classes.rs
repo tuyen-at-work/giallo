@@ -56,7 +56,7 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "type" => "T",
         "using" => "U",
         "value" => "V",
-        "unrecognized" | "unimplemented" => "W",
+        "double" => "W",
         "source" => "X",
         "accessor" => "Y",
         "separator" => "Z",
@@ -126,13 +126,13 @@ pub fn shorten_identifier(identifier: &str, prefix: &str) -> String {
         "percentage" => "P_",
         "preprocessor" => "R_",
         "section" => "S_",
+        "unrecognized" | "unimplemented" => "U_", // alias for unrecognized
         "property-value" => "V_",
         "pseudo-class" => "X_",
 
         // Lowercase suffix underscore shortcuts
         "arrow" => "a_",
         "color" => "c_",
-        "double" => "d_",
         "expression" => "e_",
         "inherited-class" => "i_",
         "media" => "m_",
