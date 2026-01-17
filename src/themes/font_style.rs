@@ -66,21 +66,26 @@ impl FontStyle {
         }
     }
 
-    pub(crate) fn css_attributes(&self) -> Vec<&'static str> {
+    pub(crate) fn css_attributes(&self, is_empty: &mut bool) -> Vec<&'static str> {
         let mut out = Vec::new();
 
         if self.contains(FontStyle::BOLD) {
             out.push("font-weight: bold;");
+            *is_empty = false;
         }
         if self.contains(FontStyle::ITALIC) {
             out.push("font-style: italic;");
+            *is_empty = false;
         }
         if self.contains(FontStyle::UNDERLINE) && self.contains(FontStyle::STRIKETHROUGH) {
             out.push("text-decoration: underline line-through;");
+            *is_empty = false;
         } else if self.contains(FontStyle::UNDERLINE) {
             out.push("text-decoration: underline;");
+            *is_empty = false;
         } else if self.contains(FontStyle::STRIKETHROUGH) {
             out.push("text-decoration: line-through;");
+            *is_empty = false;
         }
 
         out
